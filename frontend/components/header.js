@@ -24,7 +24,7 @@ class Header extends React.Component {
 
                 {!this.state.user && 
                     <Link href="/login">
-                        <a>Login</a>
+                        <a>Login/Signup</a>
                     </Link>
                 }
 
