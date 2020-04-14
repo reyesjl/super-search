@@ -22,7 +22,7 @@ class Login extends React.Component {
                         <br />
                         <p id="label">password</p>
                         <p><input type="password"></input></p>
-                        <p></p>
+                        <p id="loginButton"><button>Login</button></p>
                     </div>
                 </div>
             </div>

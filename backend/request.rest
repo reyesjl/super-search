@@ -1,0 +1,34 @@
+POST http://localhost:8080/login 
+Content-Type: application/json
+
+{
+    "username": "jreyes",
+    "password": "password2"
+}
+
+POST http://localhost:8080/register
+Content-Type: application/json
+
+{
+    "username": "jreyes",
+    "screenname": "joserugbyreyes",
+    "password": "password2",
+    "zipcode": "22192"
+}
+
+POST http://localhost:8080/register
+Content-Type: application/json
+
+{
+    "username": "benn123",
+    "screenname": "bennTarMonster",
+    "password": "password",
+    "zipcode": "22401"
+}
+
+
+
+
+
+
+
