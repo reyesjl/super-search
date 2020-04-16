@@ -1,28 +1,29 @@
 import Link from 'next/link';
+import jsCookie from 'js-cookie';
 
 class Header extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {user: ''}
+        this.state = {user: ""}
     }
-    
+
     render() {
         return (
             <div class="header">
-                {this.state.user && 
+                {jsCookie.get("screenname") && 
                     <Link href="/">
-                        <a id="unlink">{this.state.user}</a>
+                        <a id="unlink">{jsCookie.get("screenname")}</a>
                     </Link>
                 }
 
-                {this.state.user && 
+                {jsCookie.get("screenname") && 
                     <Link href="/">
                         <a>Logout</a>
                     </Link>
                 }
 
-                {!this.state.user && 
+                {!jsCookie.get("screenname") && 
                     <Link href="/login">
                         <a>Login/Signup</a>
                     </Link>

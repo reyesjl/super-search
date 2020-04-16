@@ -61,11 +61,12 @@ app.post('/login', async (req, res) => {
     } else {
         try {
             if(await bcrypt.compare(req.body.password, userExistsRes.rows[0].password)) {
-                res.json("login successful!");
-                console.log(userExistsRes.rows[0].username);
-                console.log(userExistsRes.rows[0].screenname);
-                console.log(userExistsRes.rows[0].password);
-                console.log(userExistsRes.rows[0].zipcode);
+                const username = userExistsRes.rows[0].username;
+                const screenname = userExistsRes.rows[0].screenname;
+                const password = userExistsRes.rows[0].password;
+                const zipcode = userExistsRes.rows[0].zipcode;
+
+                res.json({"status":"success", "screenname":screenname, "zipcode":zipcode});
             } else {
                 res.json("incorrect password!");
             }
