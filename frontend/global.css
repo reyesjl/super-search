@@ -131,6 +131,7 @@ input {
     font-weight: 400;
     transition: 220ms;
     margin-right: 45px;
+    cursor: pointer;
 }
 
 .header a:hover {

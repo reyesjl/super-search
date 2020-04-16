@@ -1,11 +1,18 @@
 import Link from 'next/link';
 import jsCookie from 'js-cookie';
+import Router from 'next/router';
 
 class Header extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {user: ""}
+    }
+
+    // log user out
+    logoutCurrentUser(evt) {
+        jsCookie.remove("screenname");
+        Router.replace("/login");
     }
 
     render() {
@@ -18,9 +25,7 @@ class Header extends React.Component {
                 }
 
                 {jsCookie.get("screenname") && 
-                    <Link href="/">
-                        <a>Logout</a>
-                    </Link>
+                    <a onClick={this.logoutCurrentUser.bind(this)}>Logout</a>
                 }
 
                 {!jsCookie.get("screenname") && 
