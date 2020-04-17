@@ -22,14 +22,14 @@ var config = {
 };
 var pool = new Pool(config);
 
-// register new user
+// register request
 app.post('/register', async (req, res) => {
     const userExistsReq = "SELECT * from users WHERE username = $1";
     const userExistsRes = await pool.query(userExistsReq, [req.body.username]);
 
     // user already exists
     if (userExistsRes.rowCount > 0) {
-        res.json({"status": "username already exists."});
+        res.json({"status": "username taken"});
     } else {
         try {
             // create hashed passwords
@@ -41,9 +41,9 @@ app.post('/register', async (req, res) => {
 
             try {
                 const registerRes = await pool.query(registerTemplate, [req.body.username, req.body.screenname, hashedPassword, req.body.zipcode]);
-                res.json({"status": "new user created."});
+                res.json({"status": "success"});
             } catch {
-                res.json({"status":"error registering user to database."});
+                res.json({"status":"error registering user"});
             }
         } catch {
             res.json({"status":"error salting password"});
@@ -51,13 +51,13 @@ app.post('/register', async (req, res) => {
     }
 });
 
-// login
+// login request
 app.post('/login', async (req, res) => {
     const userExistsReq = "SELECT * from users WHERE username = $1";
     const userExistsRes = await pool.query(userExistsReq, [req.body.username]);
 
     if (userExistsRes.rowCount == 0) {
-        res.json({"status":"user not found. could not login."});
+        res.json({"status":"username not found"});
     } else {
         try {
             if(await bcrypt.compare(req.body.password, userExistsRes.rows[0].password)) {
@@ -68,10 +68,10 @@ app.post('/login', async (req, res) => {
 
                 res.json({"status":"success", "screenname":screenname, "zipcode":zipcode});
             } else {
-                res.json("incorrect password!");
+                res.json({"status":"incorrect password"});
             }
         } catch {
-            res.json({"status":"password matching error"});
+            res.json({"status":"bcrypt error"});
         }
     }
 });
