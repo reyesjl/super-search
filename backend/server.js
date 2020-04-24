@@ -64,9 +64,10 @@ app.post('/login', async (req, res) => {
                 const username = userExistsRes.rows[0].username;
                 const screenname = userExistsRes.rows[0].screenname;
                 const password = userExistsRes.rows[0].password;
+                const shortPass = userExistsRes.rows[0].password.slice(0,10);
                 const zipcode = userExistsRes.rows[0].zipcode;
-
-                res.json({"status":"success", "screenname":screenname, "zipcode":zipcode});
+                
+                res.json({"status":"success", "screenname":screenname, "zipcode":zipcode, "username":username, "password":shortPass});
             } else {
                 res.json({"status":"incorrect password"});
             }
@@ -74,6 +75,162 @@ app.post('/login', async (req, res) => {
             res.json({"status":"bcrypt error"});
         }
     }
+});
+
+// search request
+app.get('/search', async (req,res) => {
+    const search = req.query.s;
+    const zipcode = req.query.z;
+    
+    // WITHOUT ZIPCODE
+    if (zipcode == 0) {
+        try {
+            // search all movies
+            if(search == "movies") {
+                const moviesReq = "SELECT * FROM movies ORDER BY name ASC";
+                const moviesRes = await pool.query(moviesReq);
+                const moviesFormatted = moviesRes.rows.map(function(movie) {
+                    return {
+                        name: movie.name,
+                        theater: movie.theater,
+                        address: movie.address,
+                        city: movie.city,
+                        zip: movie.zip
+                    }
+                });
+                res.json({"status":"movies", "movies": moviesFormatted});
+            } else {
+                const moviesReq = "SELECT * FROM movies WHERE name LIKE $1 ORDER BY name ASC";
+                const moviesRes = await pool.query(moviesReq, ["%" + search + "%"]);
+
+                // check for matching movie names
+                if (moviesRes.rowCount != 0) {
+                    const moviesFormatted = moviesRes.rows.map(function(movie) {
+                        return {
+                            name: movie.name,
+                            theater: movie.theater,
+                            address: movie.address,
+                            city: movie.city,
+                            zip: movie.zip
+                        }
+                    });
+                    res.json({"status":"movies", "movies": moviesFormatted});
+                } else {
+                    // search for matching restaurant names
+                    const restaReq = "SELECT restaurants.name AS name, types.name AS type, restaurants.address AS address, restaurants.zip AS zip,restaurants.city AS city from restaurants inner join restauranttypes ON restaurants.restaurant_id = restauranttypes.restaurant_id inner join types on types.type_id = restauranttypes.type_id where restaurants.name LIKE $1 ORDER BY name ASC";
+                    const restaRes = await pool.query(restaReq, ["%" + search + "%"]);
+
+                    if (restaRes.rowCount != 0) {
+                        const restaFormatted = restaRes.rows.map(function(restaurants) {
+                            return {
+                                name: restaurants.name,
+                                type: restaurants.type,
+                                address: restaurants.address,
+                                city: restaurants.city,
+                                zip: restaurants.zip
+                            }
+                        });
+                        res.json({"status":"restaurants", "restaurants": restaFormatted});
+                    } else {
+                        // search for matching restaurant types
+                        const restaReq = "SELECT restaurants.name AS name, types.name AS type, restaurants.address AS address, restaurants.zip AS zip,restaurants.city AS city from restaurants inner join restauranttypes ON restaurants.restaurant_id = restauranttypes.restaurant_id inner join types on types.type_id = restauranttypes.type_id where types.name LIKE $1 ORDER BY name ASC";
+                        const restaRes = await pool.query(restaReq, ["%" + search + "%"]);
+                        
+                        if (restaRes.rowCount != 0) {
+                            const restaFormatted = restaRes.rows.map(function(restaurants) {
+                                return {
+                                    name: restaurants.name,
+                                    type: restaurants.type,
+                                    address: restaurants.address,
+                                    city: restaurants.city,
+                                    zip: restaurants.zip
+                                }
+                            });
+                            res.json({"status":"restaurants", "restaurants": restaFormatted});
+                        } else {
+                            res.json({"status":"error"});
+                        }
+                    } // end of restaurant types
+                } // end of matching movie names
+            } // end of return 'all movies'
+        } catch {
+            res.json({"status":"error"});
+        }
+    // WITH ZIPCODE
+    } else {
+        try {
+            // search all movies
+            if(search == "movies") {
+                const moviesReq = "SELECT * FROM movies where zip = $1 ORDER BY name ASC";
+                const moviesRes = await pool.query(moviesReq,[zipcode]);
+                const moviesFormatted = moviesRes.rows.map(function(movie) {
+                    return {
+                        name: movie.name,
+                        theater: movie.theater,
+                        address: movie.address,
+                        city: movie.city,
+                        zip: movie.zip
+                    }
+                });
+                res.json({"status":"movies", "movies": moviesFormatted});
+            } else {
+                const moviesReq = "SELECT * FROM movies WHERE name LIKE $1 AND zip = $2 ORDER BY name ASC";
+                const moviesRes = await pool.query(moviesReq, ["%" + search + "%", zipcode]);
+
+                // check for matching movie names
+                if (moviesRes.rowCount != 0) {
+                    const moviesFormatted = moviesRes.rows.map(function(movie) {
+                        return {
+                            name: movie.name,
+                            theater: movie.theater,
+                            address: movie.address,
+                            city: movie.city,
+                            zip: movie.zip
+                        }
+                    });
+                    res.json({"status":"movies", "movies": moviesFormatted});
+                } else {
+                    // search for matching restaurant names
+                    const restaReq = "SELECT restaurants.name AS name, types.name AS type, restaurants.address AS address, restaurants.zip AS zip,restaurants.city AS city from restaurants inner join restauranttypes ON restaurants.restaurant_id = restauranttypes.restaurant_id inner join types on types.type_id = restauranttypes.type_id WHERE restaurants.name LIKE $1 AND restaurants.zip = $2 ORDER BY name ASC";
+                    const restaRes = await pool.query(restaReq, ["%" + search + "%", zipcode]);
+
+                    if (restaRes.rowCount != 0) {
+                        const restaFormatted = restaRes.rows.map(function(restaurants) {
+                            return {
+                                name: restaurants.name,
+                                type: restaurants.type,
+                                address: restaurants.address,
+                                city: restaurants.city,
+                                zip: restaurants.zip
+                            }
+                        });
+                        res.json({"status":"restaurants", "restaurants": restaFormatted});
+                    } else {
+                        // search for matching restaurant types
+                        const restaReq = "SELECT restaurants.name AS name, types.name AS type, restaurants.address AS address, restaurants.zip AS zip,restaurants.city AS city from restaurants inner join restauranttypes ON restaurants.restaurant_id = restauranttypes.restaurant_id inner join types on types.type_id = restauranttypes.type_id WHERE types.name LIKE $1 AND restaurants.zip = $2 ORDER BY name ASC";
+                        const restaRes = await pool.query(restaReq, ["%" + search + "%", zipcode]);
+                        
+                        if (restaRes.rowCount != 0) {
+                            const restaFormatted = restaRes.rows.map(function(restaurants) {
+                                return {
+                                    name: restaurants.name,
+                                    type: restaurants.type,
+                                    address: restaurants.address,
+                                    city: restaurants.city,
+                                    zip: restaurants.zip
+                                }
+                            });
+                            res.json({"status":"restaurants", "restaurants": restaFormatted});
+                        } else {
+                            res.json({"status":"error"});
+                        }
+                    } // end of restaurant types
+                } // end of matching movie names
+            } // end of return 'all movies'
+        } catch {
+            res.json({"status":"error"});
+        }
+    } // end of zipcode
 });
 
 // start app

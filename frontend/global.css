@@ -146,3 +146,22 @@ input {
     cursor: default;
     pointer-events: none;
 }
+
+.myTable {
+    width: 80%;
+    margin: 15vh auto;
+    text-align: left;
+    font-family: Ubuntu;
+}
+
+td {
+    padding: 10px 0 10px 0;
+}
+
+.home-desc {
+    width: 30%;
+    margin: 15vh auto;
+    font-family: Ubuntu;
+    border: 2px solid black;
+    padding: 20px;
+}

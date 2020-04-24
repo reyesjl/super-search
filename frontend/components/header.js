@@ -11,7 +11,8 @@ class Header extends React.Component {
 
     // log user out
     logoutCurrentUser(evt) {
-        jsCookie.remove("screenname");
+        jsCookie.remove('screenname');
+        jsCookie.remove('zipcode');
         Router.replace("/login");
     }
 

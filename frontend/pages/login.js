@@ -36,7 +36,16 @@ class Login extends React.Component {
         // handle response
         if(loggedInUser.status == "success") {
             console.log(this.state.username + " has been logged in!");
+            
+            // set cookies
+            jsCookie.remove('screenname');
+            jsCookie.remove('zipcode');
+            jsCookie.remove('username');
+            jsCookie.remove('password');
             jsCookie.set('screenname', loggedInUser.screenname);
+            jsCookie.set('zipcode', loggedInUser.zipcode);
+            jsCookie.set('username', loggedInUser.username);
+            jsCookie.set('password', loggedInUser.password);
             Router.replace("/");
         } else {
             console.log("Error: " + loggedInUser);
